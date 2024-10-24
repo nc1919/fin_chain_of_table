@@ -14,7 +14,7 @@ def main(
     raw2clean_path: str ="data/tabfact/raw2clean.jsonl",
     model_name: str = "gemini-1.5-flan",  # Update this as per your model name in Gemini
     result_dir: str = "results/tabfact",
-    api_key: str = "AlzSyAD5P5YWRFk3onC1JXXxw5_RUcSHKlxfY",  # Updated the variable name to match Gemini's API key
+    api_key: str = "",  # Updated the variable name to match Gemini's API key
     first_n=-1,
     n_proc=1,
     chunk_size=1,
