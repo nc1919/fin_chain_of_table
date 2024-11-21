@@ -16,7 +16,7 @@
 import fire
 import os
 
-from utils.load_data import load_tabfact_dataset
+from utils.load_data import load_tatqa_dataset
 from utils.llm import ChatGPT
 from utils.helper import *
 from utils.evaluate import *
@@ -25,16 +25,16 @@ from operations import *
 
 
 def main(
-    dataset_path: str = "data/tabfact/test.jsonl",
-    raw2clean_path: str ="data/tabfact/raw2clean.jsonl",
-    model_name: str = "gpt-4",
+    dataset_path: str = "data/tatqa/tatqa_dataset_test.json",
+    raw2clean_path: str ="data/tatqa/tatqa_dataset_test.json",
+    model_name: str = "gpt-3.5-turbo",
     result_dir: str = "results/tabfact",
     openai_api_key: str = None,
     first_n=-1,
     n_proc=1,
     chunk_size=1,
 ):
-    dataset = load_tabfact_dataset(dataset_path, raw2clean_path, first_n=first_n)
+    dataset = load_tatqa_dataset(dataset_path, raw2clean_path, first_n=first_n)
     gpt_llm = ChatGPT(
         model_name=model_name,
         key=os.environ["OPENAI_API_KEY"] if openai_api_key is None else openai_api_key,

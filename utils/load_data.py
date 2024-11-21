@@ -50,6 +50,49 @@ def load_tabfact_dataset(
         dataset.append(info)
     return dataset
 
+def load_tatqa_dataset(
+    dataset_path: str,
+    raw2clean_path: str,
+    tag: str = "test",
+    first_n: int = -1
+):
+    """
+    Load the TAT-QA dataset in a format suitable for Chain-of-Table reasoning.
+
+    Parameters:
+        dataset_path (str): Path to the TAT-QA dataset file.
+        tag (str): Tag to identify the dataset (e.g., 'train', 'test').
+        first_n (int): Number of samples to load. -1 for all samples.
+
+    Returns:
+        list[dict]: Processed dataset.
+    """
+    dataset = []
+    with open(dataset_path, 'r') as f:
+        data = json.load(f)  # Assuming the dataset is a JSON array
+
+    if first_n != -1:
+        data = data[:first_n]
+
+    for i, entry in tqdm(enumerate(data), total=len(data), desc=f"Loading TAT-QA-{tag} dataset"):
+        # Extract table data
+        table_text = entry.get("table", {}).get("table", [])
+        # Process each question as a separate sample
+        for question in entry.get("questions", []):
+            sample = {
+                "id": f"{tag}-{i}-{question['uid']}",
+                "table_text": table_text,
+                "statement": question.get("question", ""),
+                "cleaned_statement": question.get("question", ""),  # Optional cleaning step
+                "chain": [],  # Initialize empty chain
+                "answer": question.get("answer", []),
+                "answer_type": question.get("answer_type", "unknown"),
+                "answer_from": question.get("answer_from", "unknown"),
+                "scale": question.get("scale", "")
+            }
+            dataset.append(sample)
+
+    return dataset
 
 def wrap_input_for_demo(statement, table_caption, table_text, cleaned_statement=None):
     return {
