@@ -1,32 +1,18 @@
-# Copyright 2024 The Chain-of-Table authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
-import fire
+import argparse
+import json
 import os
-
+import pickle
 from utils.load_data import load_tatqa_dataset
 from utils.llm import ChatGPT
 from utils.helper import *
 from utils.evaluate import *
 from utils.chain import *
 from operations import *
-
+from typing import Any, Dict, List, Tuple, Union
 
 def main(
-    dataset_path: str = "data/tabfact/test.jsonl",
-    raw2clean_path: str = "data/tabfact/raw2clean.jsonl",
+    dataset_path: str = "data/tatqa/converted_tatqa_dataset_dev.json",
+    raw2clean_path: str = "data/tatqa/converted_tatqa_dataset_dev_raw2clean.jsonl",
     model_name: str = "gpt-4",
     result_dir: str = "results/tatqa",
     openai_api_key: str = None,
@@ -64,12 +50,12 @@ def main(
     ]
     final_result, _ = fixed_chain_exec_mp(gpt_llm, proc_samples, fixed_chain)
     acc = tabfact_match_func_for_samples(final_result)
-    print("Accuracy:", acc)
 
-    print(
-        f'Accuracy: {acc}',
-        file=open(os.path.join(result_dir, "result.txt"), "w")
-    )
+    # Save accuracy and results to files
+    print("Accuracy:", acc)
+    with open(os.path.join(result_dir, "result.txt"), "w") as result_file:
+        result_file.write(f"Accuracy: {acc}\n")
+
     pickle.dump(
         final_result, open(os.path.join(result_dir, "final_result.pkl"), "wb")
     )
@@ -78,6 +64,14 @@ def main(
         open(os.path.join(result_dir, "dynamic_chain_log_list.pkl"), "wb")
     )
 
+    # Save predictions to a JSON file
+    predictions_path = os.path.join(result_dir, "predictions.json")
+    with open(predictions_path, "w") as pred_file:
+        json.dump(final_result, pred_file, indent=4)
+
+    print(f"Predicted results saved to {predictions_path}")
+
 
 if __name__ == "__main__":
+    import fire
     fire.Fire(main)
